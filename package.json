@@ -1,0 +1,27 @@
+{
+  "name": "encapsulation-workshops-base",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sikora00/encapsulation-workshops-base.git"
+  },
+  "author": "Maciej Sikorski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sikora00/encapsulation-workshops-base/issues"
+  },
+  "homepage": "https://github.com/Sikora00/encapsulation-workshops-base#readme",
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "jest": "^27.5.1",
+    "jest-cucumber": "^3.0.1",
+    "ts-jest": "^27.1.3",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.5.5"
+  }
+}
