@@ -1,7 +1,6 @@
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import Product from '../../../src/Product';
 import Person from '../../../src/Person';
-import Wallet from '../../../src/Wallet';
 
 const feature = loadFeature('shop/specs/features/02-buying-products.feature');
 
@@ -21,13 +20,13 @@ defineFeature(feature, (test) => {
     });
 
     and('I have $10 in my wallet', () => {
-      person.addCash(10);
+      person.getWallet().addMoney(10);
 
-      expect(person.getCash()).toBe(10);
+      expect(person.getWallet().getBalance()).toBe(10);
     });
 
     when('I buy this product', () => {
-      person.buyProductUsingCash(product);
+      person.buyProductUsingWallet(product);
     });
 
     then('I have this product on my products list', () => {
@@ -35,7 +34,7 @@ defineFeature(feature, (test) => {
     });
 
     and('I have $9 left in the wallet', () => {
-      expect(person.getCash()).toBe(9);
+      expect(person.getWallet().getBalance()).toBe(9);
     });
   });
 
@@ -59,14 +58,13 @@ defineFeature(feature, (test) => {
     });
 
     and('I have $1 in my wallet', () => {
-      person.addCash(1);
-      expect(person.getCash()).toBe(1);
+      person.getWallet().addMoney(1);
+      expect(person.getWallet().getBalance()).toBe(1);
     });
 
     when('I buy this product', () => {
       try {
-        person.buyProductUsingCash(product);
-
+        person.buyProductUsingWallet(product);
       } catch (e) {
         error = e.message;
       }
@@ -75,6 +73,7 @@ defineFeature(feature, (test) => {
     then('I see message "You have not enough money to buy it"', () => {
       expect(person.getProductList().getProducts()).not.toContain(product);
       expect(error).toBe('You have not enough money to buy it');
+      expect(person.getWallet().getBalance()).toBe(1);
     });
   });
 });

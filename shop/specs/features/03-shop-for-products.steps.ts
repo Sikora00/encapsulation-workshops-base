@@ -42,7 +42,7 @@ defineFeature(feature, (test) => {
 
     and('I am a customer', () => {
       person = new Person('John Doe', 0);
-      wallet = new Wallet();
+      wallet = person.getWallet();
 
       wallet.addMoney(10);
       expect(person.getName()).toBe('John Doe');
@@ -78,7 +78,7 @@ defineFeature(feature, (test) => {
 
     and('I am a customer', () => {
       person = new Person('John Doe', 0);
-      wallet = new Wallet();
+      wallet = person.getWallet();
 
       wallet.addMoney(10);
       expect(person.getName()).toBe('John Doe');

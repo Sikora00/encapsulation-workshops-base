@@ -6,13 +6,15 @@ import Wallet from "./Wallet";
 export default class Person {
     private name: string;
     private cash: number;
+    private wallet: Wallet;
 
     private productList: ProductList;
       
-    constructor(name: string, cash: number = 0, productList: ProductList = new ProductList()) {
+    constructor(name: string, cash: number = 0, productList: ProductList = new ProductList(), wallet: Wallet = new Wallet()) {
         this.name = name;
         this.cash = cash;
         this.productList = productList;
+        this.wallet = wallet;
     }
       
     getName(): string {
@@ -35,12 +37,16 @@ export default class Person {
         this.cash -= cash;
     }
 
-    buyProductUsingWallet(product: Product, wallet: Wallet): void {
-        if (wallet.getBalance() < product.getPrice()) {
+    getWallet(): Wallet {
+        return this.wallet;
+    }
+
+    buyProductUsingWallet(product: Product): void {
+        if (this.wallet.getBalance() < product.getPrice()) {
             throw new Error('You have not enough money to buy it');
         }
 
-        wallet.withdrawMoney(product.getPrice());
+        this.wallet.withdrawMoney(product.getPrice());
 
         this.productList.addProduct(product);
     }

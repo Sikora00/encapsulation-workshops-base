@@ -11,9 +11,10 @@ defineFeature(feature, (test) => {
   let cashMachine: Bank;
 
   beforeEach(() => {
-    wallet = new Wallet();
     person = new Person('John', 0);
     cashMachine = new Bank();
+    wallet = person.getWallet();
+
     wallet.addMoney(5);
   });
 
@@ -23,7 +24,7 @@ defineFeature(feature, (test) => {
     });
 
     when('I withdraw the money $2 from the wallet', () => {
-      cashMachine.fromWalletToCash(2, person, wallet);
+      cashMachine.fromWalletToCash(2, person);
     });
 
     then('I have $2 in money', () => {
@@ -47,7 +48,7 @@ defineFeature(feature, (test) => {
 
     when('I withdraw the money $6 from the wallet', () => {
       try {
-        cashMachine.fromWalletToCash(6, person, wallet);
+        cashMachine.fromWalletToCash(6, person);
       } catch (e) {
         error = e.message;
       }
@@ -55,6 +56,8 @@ defineFeature(feature, (test) => {
 
     then('I see message "You have not enough money in your wallet."', () => {
       expect(error).toBe('You have not enough money in your wallet.');
+      expect(wallet.getBalance()).toBe(5);
+      expect(person.getCash()).toBe(0);
     });
   });
 });
