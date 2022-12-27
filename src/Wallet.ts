@@ -11,7 +11,7 @@ export default class Wallet {
      
     withdrawMoney(amount: number): void {
         if (this.balance < amount) {
-        throw new Error('You have not enough money in your wallet.');
+            throw new Error('You have not enough money in your wallet.');
         }
      
         this.balance -= amount;

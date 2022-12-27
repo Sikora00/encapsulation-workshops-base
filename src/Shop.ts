@@ -20,20 +20,24 @@ export default class Shop {
     }
 
     sellProduct(product: Product, quantity: number): void {
-        const shopGoods = this.shopGoods.find(p => p.getSku() === product.getSku());
-
-        if (!shopGoods) {
-            throw new Error('Shop has not this product');
-        }
-
+        const shopGoods = this.findProductBySku(product.getSku());
 
         if (shopGoods.getQuantity() < quantity) {
             throw new Error(`There is no ${product.getName()} available right now to buy`);
         }
 
         shopGoods.removeQuantity(quantity);
-
         this.wallet.addMoney(product.getPrice() * quantity);
+    }
+
+    findProductBySku(sku: string): ShopGoods {
+        const shopGoods = this.shopGoods.find(p => p.getSku() === sku);
+
+        if (!shopGoods) {
+            throw new Error('Shop has not this product');
+        }
+
+        return shopGoods;
     }
 
     getWallet(): Wallet {

@@ -1,7 +1,6 @@
 import { defineFeature, DefineStepFunction, loadFeature } from 'jest-cucumber';
 import Product from '../../../src/Product';
 import Shop from '../../../src/Shop';
-import Bank from '../../../src/Bank';
 import ShopGoods from '../../../src/ShopGoods';
 import Person from '../../../src/Person';
 import Wallet from '../../../src/Wallet';
