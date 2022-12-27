@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "ts-node-dev --respawn --transpileOnly src/index.ts"
   },
   "repository": {
     "type": "git",
