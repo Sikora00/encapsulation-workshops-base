@@ -1,28 +1,29 @@
 import { defineFeature, loadFeature } from 'jest-cucumber';
-import Product from '../../../src/Product';
+import ProductDTO from '../../../src/dtos/ProductDTO';
 import Person from '../../../src/Person';
+import Wallet from '../../../src/Wallet';
 
 const feature = loadFeature('shop/specs/features/02-buying-products.feature');
 
 defineFeature(feature, (test) => {
-  let product: Product;
+  let product: ProductDTO;
   let person: Person;
+  let wallet;
 
   test('Customer by product he is afford to.', ({ given, when, then, and }) => {
     given('There is a product called "red apple" that cost $1', () => {
-      product = new Product('red apple', 1);
+      product = new ProductDTO('red apple', 1);
+      wallet = new Wallet(10);
     });
 
     and('I am "John Doe"', () => {
-      person = new Person('John Doe', 0);
+      person = new Person('John Doe', 0, wallet);
 
-      expect(person.getName()).toBe('John Doe');
+      expect(person).toMatchObject({ name: 'John Doe'});
     });
 
     and('I have $10 in my wallet', () => {
-      person.getWallet().addMoney(10);
-
-      expect(person.getWallet().getBalance()).toBe(10);
+      expect(wallet).toMatchObject({ balance: 10});
     });
 
     when('I buy this product', () => {
@@ -30,11 +31,13 @@ defineFeature(feature, (test) => {
     });
 
     then('I have this product on my products list', () => {
-      expect(person.getProductList().getProducts()).toContain(product);
+      expect(person.productList).toMatchObject({
+        products: [product],
+      });
     });
 
     and('I have $9 left in the wallet', () => {
-      expect(person.getWallet().getBalance()).toBe(9);
+      expect(wallet).toMatchObject({ balance: 9 });
     });
   });
 
@@ -47,19 +50,18 @@ defineFeature(feature, (test) => {
     let error: string;
 
     given('There is a product called "yellow pear" that cost $2', () => {
-      product = new Product('yellow pear', 2);
-      expect(product.getName()).toBe('yellow pear');
+      product = new ProductDTO('yellow pear', 2);
     });     
 
 
     and('I am "John Doe"', () => {
-      person = new Person('John Doe', 0);
-      expect(person.getName()).toBe('John Doe');
+      wallet = new Wallet(1);
+      person = new Person('John Doe', 0, wallet);
+      expect(person).toMatchObject({ name: 'John Doe' });
     });
 
     and('I have $1 in my wallet', () => {
-      person.getWallet().addMoney(1);
-      expect(person.getWallet().getBalance()).toBe(1);
+      expect(wallet).toMatchObject({ balance: 1 });
     });
 
     when('I buy this product', () => {
@@ -71,9 +73,11 @@ defineFeature(feature, (test) => {
     });
 
     then('I see message "You have not enough money to buy it"', () => {
-      expect(person.getProductList().getProducts()).not.toContain(product);
+      expect(person.productList).toMatchObject({
+        products: [],
+      });
       expect(error).toBe('You have not enough money to buy it');
-      expect(person.getWallet().getBalance()).toBe(1);
+      expect(wallet).toMatchObject({ balance: 1 });
     });
   });
 });

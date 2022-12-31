@@ -1,54 +1,39 @@
-import Product from "./Product";
-import ShopGoods from "./ShopGoods";
+import ProductDTO from "./dtos/ProductDTO";
+import ShopGoodsDTO from "./dtos/ShopGoodsDTO";
 import Wallet from "./Wallet";
 
 export default class Shop {
-    private shopGoods: ShopGoods[];
+    private shopGoods: ShopGoodsDTO[];
     private wallet: Wallet;
   
-    constructor() {
-        this.shopGoods = [];
-        this.wallet = new Wallet();
+    constructor(shopGoods: ShopGoodsDTO[] = [], wallet: Wallet = new Wallet()) {
+        this.shopGoods = shopGoods;
+        this.wallet = wallet;
     }
 
-    addShopGoods(shopGoods: ShopGoods): void {
+    addShopGoods(shopGoods: ShopGoodsDTO): void {
         this.shopGoods.push(shopGoods);
     }
 
-    removeShopGoods(shopGoods: ShopGoods): void {
+    removeShopGoods(shopGoods: ShopGoodsDTO): void {
         this.shopGoods = this.shopGoods.filter(p => p !== shopGoods);
     }
 
-    sellProduct(product: Product, quantity: number): void {
-        const shopGoods = this.findProductBySku(product.getSku());
+    sellProduct(product: ProductDTO, quantity: number): void {
+        const shopGoods = this.findProductBySku(product.sku);
 
-        if (shopGoods.getQuantity() < quantity) {
-            throw new Error(`There is no ${product.getName()} available right now to buy`);
-        }
-
-        shopGoods.removeQuantity(quantity);
-        this.wallet.addMoney(product.getPrice() * quantity);
+        shopGoods.removeFromStock(quantity);
+        
+        this.wallet.deposit(product.price * quantity);
     }
 
-    findProductBySku(sku: string): ShopGoods {
-        const shopGoods = this.shopGoods.find(p => p.getSku() === sku);
+    findProductBySku(sku: string): ShopGoodsDTO {
+        const shopGoods = this.shopGoods.find(p => p.sku === sku);
 
         if (!shopGoods) {
             throw new Error('Shop has not this product');
         }
 
         return shopGoods;
-    }
-
-    getWallet(): Wallet {
-        return this.wallet;
-    }
-
-    setShopGoods(shopGoods: ShopGoods[]): void {
-        this.shopGoods = shopGoods;
-    }
-
-    getShopGoods(): ShopGoods[] {
-        return this.shopGoods;
     }
 }

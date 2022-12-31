@@ -1,79 +1,55 @@
-import Product from "./Product";
 import ProductList from "./ProductList";
 import Shop from "./Shop";
 import Wallet from "./Wallet";
+import ProductDTO from "./dtos/ProductDTO";
 
 export default class Person {
     private name: string;
     private cash: number;
     private wallet: Wallet;
 
-    private productList: ProductList;
+    public productList: ProductList;
       
-    constructor(name: string, cash: number = 0, productList: ProductList = new ProductList(), wallet: Wallet = new Wallet()) {
+    constructor(name: string, cash: number = 0, wallet: Wallet = new Wallet(),  productList: ProductList = new ProductList()) {
         this.name = name;
         this.cash = cash;
         this.productList = productList;
         this.wallet = wallet;
     }
+
+    withdrawMoneyFromWallet(amount: number): Person {
+        this.wallet.withdraw(amount);
+        this.cash += amount;
+
+        return this;
+    }
+
       
-    getName(): string {
-        return this.name;
-    }
-
-    getCash(): number {
-        return this.cash;
-    }
-
-    setCash(cash: number): void {
-        this.cash = cash;
-    }
-
-    addCash(cash: number): void {
-        this.cash += cash;
-    }
-
-    removeCash(cash: number): void {
-        this.cash -= cash;
-    }
-
-    getWallet(): Wallet {
-        return this.wallet;
-    }
-
-    buyProductUsingWallet(product: Product): void {
-        if (this.wallet.getBalance() < product.getPrice()) {
+    buyProductUsingWallet(product: ProductDTO): void {
+        try {
+            this.wallet.withdraw(product.price);
+        } catch (e) {
             throw new Error('You have not enough money to buy it');
         }
-
-        this.wallet.withdrawMoney(product.getPrice());
 
         this.productList.addProduct(product);
     }
 
-    buyProductUsingCash(product: Product): void {
-        if (this.cash < product.getPrice()) {
+    buyProductUsingCash(product: ProductDTO): void {
+        if (this.cash < product.price) {
             throw new Error('You have not enough money to buy it');
         }
 
-        this.cash -= product.getPrice();
+        this.cash -= product.price;
         this.productList.addProduct(product);
     }
 
 
-    buyProductFromShopUsingWallet(product: Product, shop: Shop, wallet: Wallet): void {
-        if (wallet.getBalance() < product.getPrice()) {
-            throw new Error(`'You have not enough money to buy it'`);
-        }
+    buyProductFromShopUsingWallet(product: ProductDTO, shop: Shop, wallet: Wallet): void {
+        wallet.withdraw(product.price);
 
-        wallet.withdrawMoney(product.getPrice());
         shop.sellProduct(product, 1);
 
         this.productList.addProduct(product);
-    }
-
-
-    getProductList(): ProductList {
-        return this.productList;
     }
 }

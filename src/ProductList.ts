@@ -1,17 +1,13 @@
-import Product from "./Product";
+import ProductDTO from "./dtos/ProductDTO";
 
 export default class ProductList {
-    private products: Product[] = [];
+    private products: ProductDTO[] = [];
  
-    addProduct(product: Product): void {
+    addProduct(product: ProductDTO): void {
         this.products.push(product);
     }
  
-    getProducts(): Product[] {
-        return this.products;
-    }
- 
-    removeProduct(product: Product): void {
+    removeProduct(product: ProductDTO): void {
         this.products = this.products.filter(p => p !== product);
     }
 }

@@ -1,19 +1,22 @@
 export default class Wallet {
-    private balance: number = 0;
+    private balance: number;
+
+    constructor(balance: number = 0) {
+        this.balance = balance;
+    }
      
-    withdrawMoney(amount: number): void {
+    withdraw(amount: number): Wallet {
         if (this.balance < amount) {
             throw new Error('You have not enough money in your wallet.');
         }
      
         this.balance -= amount;
+
+        return this;
     }
 
-    addMoney(amount: number): void {
+    deposit(amount: number): Wallet {
         this.balance += amount;
-    }
-     
-    getBalance(): number {
-        return this.balance;
+        return this;
     }
 }

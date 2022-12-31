@@ -1,14 +1,14 @@
 import { defineFeature, DefineStepFunction, loadFeature } from 'jest-cucumber';
-import Product from '../../../src/Product';
 import Shop from '../../../src/Shop';
-import ShopGoods from '../../../src/ShopGoods';
 import Person from '../../../src/Person';
 import Wallet from '../../../src/Wallet';
+import ProductDTO from '../../../src/dtos/ProductDTO';
+import ShopGoodsDTO from '../../../src/dtos/ShopGoodsDTO';
 
 const feature = loadFeature('shop/specs/features/03-shop-for-products.feature');
 
 defineFeature(feature, (test) => {
-  let product: Product;
+  let product: ProductDTO;
   let shop: Shop;
   let person: Person;
   let wallet: Wallet;
@@ -16,17 +16,16 @@ defineFeature(feature, (test) => {
 
   const givenThereIsRedApply = (given: DefineStepFunction) => {
     given('There is "red apple" with sku "1" and the price $1', () => {
-      product = new Product('red apple', 1, "1");
-      expect (product.getName()).toBe('red apple');
-      expect (product.getSku()).toBe("1");
+      product = new ProductDTO('red apple', 1, "1");
     });
   };
 
   const andThereIsAShop = (and: DefineStepFunction) => {
     and('There is a shop with $0 on the bank account', () => {
-      shop = new Shop();
+      wallet = new Wallet(0);
+      shop = new Shop([], wallet);
 
-      expect(shop.getWallet().getBalance()).toBe(0);
+      expect(wallet).toMatchObject({ balance: 0 });
     });
   };
 
@@ -34,18 +33,16 @@ defineFeature(feature, (test) => {
     givenThereIsRedApply(given);
     andThereIsAShop(and);
     given('There is a shop with 1 red apple in the stock', () => {
-      const shopGood = new ShopGoods(product.getName(), product.getPrice(), product.getSku(), 1);
+      const shopGood = new ShopGoodsDTO(product.name, product.price, product.sku, 1);
 
       shop.addShopGoods(shopGood);
-      expect(shop.getShopGoods()[0].getQuantity()).toBe(1);
     });
 
     and('I am a customer', () => {
-      person = new Person('John Doe', 0);
-      wallet = person.getWallet();
+      wallet = new Wallet(10);
+      person = new Person('John Doe', 0, wallet);
 
-      wallet.addMoney(10);
-      expect(person.getName()).toBe('John Doe');
+      expect(person).toMatchObject({ name: 'John Doe' });
     });
 
     when('I buy red apple from the shop', () => {
@@ -53,11 +50,15 @@ defineFeature(feature, (test) => {
     });
 
     then('Shop have $1 on the bank account', () => {
-      expect(shop.getWallet().getBalance()).toBe(1);
+      expect(shop).toMatchObject({
+        wallet: { balance: 1 },
+      });
     });
 
     and('Shop have 0 red apples in the stock', () => {
-      expect(shop.getShopGoods()[0].getQuantity()).toBe(0);
+      expect(shop.findProductBySku(product.sku)).toMatchObject({
+        quantity: 0,
+      });
     });
   });
 
@@ -70,18 +71,15 @@ defineFeature(feature, (test) => {
     givenThereIsRedApply(given);
     andThereIsAShop(and);
     given('There is a shop with 0 red apples in the stock', () => {
-      const shopGood = new ShopGoods(product.getName(), product.getPrice(), product.getSku(), 0);
-
-      shop.addShopGoods(shopGood);
-      expect(shop.getShopGoods()[0].getQuantity()).toBe(0);
+      const shopGood = new ShopGoodsDTO(product.name, product.price, product.sku, 0);
+      shop = new Shop([shopGood], wallet);
     });
 
     and('I am a customer', () => {
-      person = new Person('John Doe', 0);
-      wallet = person.getWallet();
+      wallet = new Wallet(10);
+      person = new Person('John Doe', 0, wallet);
 
-      wallet.addMoney(10);
-      expect(person.getName()).toBe('John Doe');
+      expect(person).toMatchObject({ name: 'John Doe' });
     });
 
     when('I buy red apple from the shop', () => {
