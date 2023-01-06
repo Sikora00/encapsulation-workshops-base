@@ -1,39 +1,39 @@
-import ProductDTO from "./dtos/ProductDTO";
-import ShopGoodsDTO from "./dtos/ShopGoodsDTO";
+import PurchasedProduct from "./Product/PurchasedPoduct";
+import ToBuyProduct from "./Product/ToBuyProduct";
 import Wallet from "./Wallet";
 
 export default class Shop {
-    private shopGoods: ShopGoodsDTO[];
-    private wallet: Wallet;
-  
-    constructor(shopGoods: ShopGoodsDTO[] = [], wallet: Wallet = new Wallet()) {
-        this.shopGoods = shopGoods;
-        this.wallet = wallet;
+  private shopGoods: ToBuyProduct[];
+  private wallet: Wallet;
+
+  constructor(shopGoods: ToBuyProduct[] = [], wallet: Wallet = new Wallet()) {
+    this.shopGoods = shopGoods;
+    this.wallet = wallet;
+  }
+
+  addShopGoods(shopGoods: ToBuyProduct): void {
+    this.shopGoods.push(shopGoods);
+  }
+
+  removeShopGoods(shopGoods: ToBuyProduct): void {
+    this.shopGoods = this.shopGoods.filter((p) => p !== shopGoods);
+  }
+
+  sellProduct(product: ToBuyProduct, quantity: number): PurchasedProduct {
+    const shopGoods = this.findProductBySku(product);
+    const purchasedProduct = shopGoods.sell(quantity);
+    purchasedProduct.depositProfit(this.wallet);
+
+    return purchasedProduct;
+  }
+
+  findProductBySku(product: ToBuyProduct): ToBuyProduct {
+    const shopGoods = this.shopGoods.find((p) => p.equalSku(product));
+
+    if (!shopGoods) {
+      throw new Error("Shop has not this product");
     }
 
-    addShopGoods(shopGoods: ShopGoodsDTO): void {
-        this.shopGoods.push(shopGoods);
-    }
-
-    removeShopGoods(shopGoods: ShopGoodsDTO): void {
-        this.shopGoods = this.shopGoods.filter(p => p !== shopGoods);
-    }
-
-    sellProduct(product: ProductDTO, quantity: number): void {
-        const shopGoods = this.findProductBySku(product.sku);
-
-        shopGoods.removeFromStock(quantity);
-        
-        this.wallet.deposit(product.price * quantity);
-    }
-
-    findProductBySku(sku: string): ShopGoodsDTO {
-        const shopGoods = this.shopGoods.find(p => p.sku === sku);
-
-        if (!shopGoods) {
-            throw new Error('Shop has not this product');
-        }
-
-        return shopGoods;
-    }
+    return shopGoods;
+  }
 }
