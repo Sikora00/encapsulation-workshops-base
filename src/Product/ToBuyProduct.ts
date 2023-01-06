@@ -11,18 +11,6 @@ export default class ToBuyProduct extends Product {
     this.sku = sku;
   }
 
-  private removeFromStock(quantity: number): void {
-    if (this.quantity < quantity) {
-      throw new Error(`There is no ${this.name} available right now to buy`);
-    }
-
-    this.quantity -= quantity;
-  }
-
-  private isQuantityEnough(quantity: number): boolean {
-    return this.quantity >= quantity;
-  }
-
   private calculateCost(quantity: number): number {
     return this.price * quantity;
   }
