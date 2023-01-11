@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Sikora00/encapsulation-workshops-base#readme",
   "devDependencies": {
     "@types/jest": "^27.4.0",
+    "@types/node": "^18.11.18",
     "jest": "^27.5.1",
     "jest-cucumber": "^3.0.1",
     "ts-jest": "^27.1.3",
