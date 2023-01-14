@@ -1,8 +1,10 @@
-import ToBuyProduct from '../product/ToBuyProduct';
-import ProductList from '../product/ProductList';
-import Shop from '../shop/Shop';
-import Wallet from '../wallet/Wallet';
+import ToBuyProduct from '../product/to-buy-product';
+import ProductList from '../product/product-list';
+import Shop from '../shop/shop';
+import Wallet from '../wallet/wallet';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export default class Person {
   private name: string;
   private cash: number;

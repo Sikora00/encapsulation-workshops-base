@@ -1,5 +1,5 @@
-import Wallet from '../wallet/Wallet';
-import Product from './Product';
+import Wallet from '../wallet/wallet';
+import Product from './product';
 
 export default class PurchasedProduct extends Product {
   private cost: number;

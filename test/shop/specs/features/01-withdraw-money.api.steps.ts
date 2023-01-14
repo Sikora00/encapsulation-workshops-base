@@ -1,39 +1,84 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { defineFeature, loadFeature } from 'jest-cucumber';
-import supertest from 'supertest';
+import { PersonController } from '../../../../src/person/person.controller';
+import { INestApplication } from '@nestjs/common';
+import Person from '../../../../src/database/entities/person.entity';
+import { Repository } from 'typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PersonProducts } from '../../../../src/database/entities/person-products.entity';
+import { PersonModule } from '../../../../src/person/person.module';
+import Wallet from '../../../../src/database/entities/wallet.entity';
+import * as supertest from 'supertest';
 
-const feature = loadFeature('shop/specs/features/01-withdraw-money.feature');
-
-const setUpData = () => {
-  //TODO: implement
-};
+const feature = loadFeature(
+  'test/shop/specs/features/01-withdraw-money.feature',
+);
 
 defineFeature(feature, (test) => {
-  const id = 1;
+  let controller: PersonController;
+  let app: INestApplication;
+  let agent;
+  let personRepository: Repository<Person>;
+  let walletRepository: Repository<Wallet>;
 
-  const agent = supertest('http://localhost:3000');
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        PersonModule,
+        TypeOrmModule.forRoot({
+          type: 'postgres',
+          host: 'localhost',
+          port: 5432,
+          username: 'admin',
+          password: 'admin',
+          database: 'nestjs',
+          entities: [Person, Wallet, PersonProducts],
+          synchronize: false,
+        }),
+      ],
+    }).compile();
 
-  beforeEach(() => {
-    setUpData();
+    controller = module.get<PersonController>(PersonController);
+    app = await module.createNestApplication();
+
+    agent = supertest.agent(app.getHttpServer());
+    await app.init();
+
+    personRepository = module.get('PersonRepository');
+    walletRepository = module.get('WalletRepository');
   });
 
   test('Withdraw money from the wallet', ({ given, when, then, and }) => {
     let response;
+    let person: Person;
 
-    given('There is a wallet with $5', () => {
-      // pass
+    afterAll(async () => {
+      await personRepository.delete(person.id);
+      await walletRepository.delete(person.wallet.id);
+    });
+
+    given('There is a wallet with $5', async () => {
+      person = await personRepository.save({
+        name: 'Test',
+        wallet: {
+          balance: 5,
+        },
+        cash: 0,
+      });
     });
 
     when('I withdraw the money $2 from the wallet', async () => {
-      await agent.post(`/person/${id}/withdraw-money`).send({ amount: 2 });
+      response = await agent
+        .post(`/person/${person.id}/withdraw-money`)
+        .send({ amount: 2 });
     });
 
     then('I have $2 in money', async () => {
-      response = await agent.get(`/person/${id}/cash`);
+      expect(response.body.cash).toBe(2);
     });
 
     and('$3 is left in the wallet', () => {
-      expect(response.body.walletBalance).toBe(3);
-      expect(response.body.cash).toBe(2);
+      expect(response.body.wallet.balance).toBe(3);
     });
   });
 
@@ -43,20 +88,34 @@ defineFeature(feature, (test) => {
     then,
   }) => {
     let error: Error;
-    given('There is a wallet with $5', () => {
-      setUpData();
+    let person: Person;
+    let response;
+
+    afterAll(async () => {
+      await personRepository.delete(person.id);
+      await walletRepository.delete(person.wallet.id);
+    });
+
+    given('There is a wallet with $5', async () => {
+      person = await personRepository.save({
+        name: 'Test',
+        wallet: {
+          balance: 5,
+        },
+        cash: 0,
+      });
     });
 
     when('I withdraw the money $6 from the wallet', async () => {
-      try {
-        await agent.post(`/person/${id}/withdraw-money`).send({ amount: 6 });
-      } catch (e) {
-        error = e.message;
-      }
+      response = await agent
+        .post(`/person/${person.id}/withdraw-money`)
+        .send({ amount: 6 });
     });
 
     then('I see message "You have not enough money in your wallet."', () => {
-      expect(error).toBe('You have not enough money in your wallet.');
+      expect(response.body.message).toBe(
+        'You have not enough money in your wallet.',
+      );
     });
   });
 });

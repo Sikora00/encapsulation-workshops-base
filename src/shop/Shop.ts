@@ -1,6 +1,6 @@
-import PurchasedProduct from '../product/PurchasedPoduct';
-import ToBuyProduct from '../product/ToBuyProduct';
-import Wallet from '../wallet/Wallet';
+import PurchasedProduct from '../product/purchased-product';
+import ToBuyProduct from '../product/to-buy-product';
+import Wallet from '../wallet/wallet';
 
 export default class Shop {
   private shopGoods: ToBuyProduct[];

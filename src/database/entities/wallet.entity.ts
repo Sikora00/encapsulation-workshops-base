@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Injectable()
-export default class Wallet {
-  private balance: number;
+@Entity()
+class Wallet {
+  @PrimaryGeneratedColumn()
+  public id: number;
 
-  constructor(balance = 0) {
-    this.balance = balance;
+  @Column()
+  public balance: number;
+
+  static create(balance = 0) {
+    return Object.assign(new Wallet(), { balance });
   }
 
   withdraw(amount: number): Wallet {
@@ -23,3 +27,5 @@ export default class Wallet {
     return this;
   }
 }
+
+export default Wallet;

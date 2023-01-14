@@ -1,6 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PersonProducts } from './entities/person-products.entity';
+import Person from './entities/person.entity';
+import Product from './entities/product.entity';
+import { ShopGoods } from './entities/shop-goods.entity';
+import Shop from './entities/shop.entity';
+import Wallet from './entities/wallet.entity';
 
 @Module({
   imports: [
@@ -14,7 +20,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
-        entities: [__dirname + '/../**/*.entity.ts'],
+        entities: [Person, Shop, Product, ShopGoods, Wallet, PersonProducts],
         synchronize: true,
       }),
     }),
