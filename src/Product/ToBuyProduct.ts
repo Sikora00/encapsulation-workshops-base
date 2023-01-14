@@ -1,5 +1,5 @@
-import Product from "./Product";
-import PurchasedProduct from "./PurchasedPoduct";
+import Product from './Product';
+import PurchasedProduct from './PurchasedPoduct';
 
 export default class ToBuyProduct extends Product {
   private sku: string;

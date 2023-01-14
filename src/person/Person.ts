@@ -1,8 +1,7 @@
-import Product from "./Product/Product";
-import ToBuyProduct from "./Product/ToBuyProduct";
-import ProductList from "./ProductList";
-import Shop from "./Shop";
-import Wallet from "./Wallet";
+import ToBuyProduct from '../product/ToBuyProduct';
+import ProductList from '../product/ProductList';
+import Shop from '../shop/Shop';
+import Wallet from '../wallet/Wallet';
 
 export default class Person {
   private name: string;
@@ -13,9 +12,9 @@ export default class Person {
 
   constructor(
     name: string,
-    cash: number = 0,
+    cash = 0,
     wallet: Wallet = new Wallet(),
-    productList: ProductList = new ProductList()
+    productList: ProductList = new ProductList(),
   ) {
     this.name = name;
     this.cash = cash;
@@ -35,7 +34,7 @@ export default class Person {
       const purchasedProduct = product.sell(1);
       purchasedProduct.executeTransaction(this.wallet);
     } catch (e) {
-      throw new Error("You have not enough money to buy it");
+      throw new Error('You have not enough money to buy it');
     }
 
     this.productList.addProduct(product);

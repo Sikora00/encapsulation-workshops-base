@@ -1,4 +1,4 @@
-import Product from "./Product/Product";
+import Product from './Product';
 
 export default class ProductList {
   private products: Product[] = [];

@@ -1,6 +1,6 @@
-import PurchasedProduct from "./Product/PurchasedPoduct";
-import ToBuyProduct from "./Product/ToBuyProduct";
-import Wallet from "./Wallet";
+import PurchasedProduct from '../product/PurchasedPoduct';
+import ToBuyProduct from '../product/ToBuyProduct';
+import Wallet from '../wallet/Wallet';
 
 export default class Shop {
   private shopGoods: ToBuyProduct[];
@@ -31,7 +31,7 @@ export default class Shop {
     const shopGoods = this.shopGoods.find((p) => p.equalSku(product));
 
     if (!shopGoods) {
-      throw new Error("Shop has not this product");
+      throw new Error('Shop has not this product');
     }
 
     return shopGoods;
