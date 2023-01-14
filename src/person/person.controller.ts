@@ -5,8 +5,22 @@ import { PersonService } from './person.service';
 export class PersonController {
   constructor(private readonly personService: PersonService) {}
 
-  @Post('/:id/withdraw-money')
-  withdrawMoney(@Param('id') id: string, @Body('amount') amount: number) {
-    return this.personService.withdrawMoney(parseInt(id), amount);
+  @Post('/:personId/withdraw-money')
+  withdrawMoney(
+    @Param('personId') personId: string,
+    @Body('amount') amount: number,
+  ) {
+    return this.personService.withdrawMoney(parseInt(personId), amount);
+  }
+
+  @Post('/:personId/product/:productId/buy')
+  buyProduct(
+    @Param('personId') personId: string,
+    @Param('personId') productId: string,
+  ) {
+    return this.personService.buyProduct(
+      parseInt(personId),
+      parseInt(productId),
+    );
   }
 }
