@@ -16,7 +16,7 @@ export class PersonController {
   @Post('/:personId/product/:productId/buy')
   buyProduct(
     @Param('personId') personId: string,
-    @Param('personId') productId: string,
+    @Param('productId') productId: string,
   ) {
     return this.personService.buyProduct(
       parseInt(personId),

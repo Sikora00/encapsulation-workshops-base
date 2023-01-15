@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import Person from '../database/entities/person.entity';
 import { Repository } from 'typeorm';
-import { ShopGoods } from 'src/database/entities/shop-goods.entity';
+
+import Person from '../database/entities/person.entity';
+import Product from '../database/entities/product.entity';
 
 @Injectable()
 export class PersonService {
   constructor(
     @InjectRepository(Person)
     private readonly personRepository: Repository<Person>,
-    @InjectRepository(Person)
-    private readonly shopGoodsRepository: Repository<ShopGoods>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
   ) {}
 
   async withdrawMoney(id: number, amount: number) {
@@ -33,7 +34,7 @@ export class PersonService {
         id: personId,
       });
 
-      const productFromDb = await this.shopGoodsRepository.findOneBy({
+      const productFromDb = await this.productRepository.findOneBy({
         id: productId,
       });
 
@@ -41,6 +42,7 @@ export class PersonService {
 
       return this.personRepository.save(personFromDbWithWallet);
     } catch (e) {
+      console.log(e);
       return { message: e.message };
     }
   }

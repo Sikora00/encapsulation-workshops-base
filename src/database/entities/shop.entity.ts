@@ -1,13 +1,13 @@
-import { ShopGoods } from './shop-goods.entity';
 import Wallet from './wallet.entity';
 import {
   Entity,
   JoinColumn,
-  OneToMany,
+  JoinTable,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PersonProducts } from './person-products.entity';
+import Product from './product.entity';
 
 @Entity()
 class Shop {
@@ -18,37 +18,38 @@ class Shop {
   @JoinColumn()
   wallet: Wallet;
 
-  @OneToMany((type) => ShopGoods, (shopGood) => shopGood.shop)
-  shopGoods: ShopGoods[];
+  @ManyToMany((type) => Product, { cascade: true, eager: true })
+  @JoinTable()
+  products: Product[];
 
-  static create(id: number, wallet: Wallet, shopGoods: ShopGoods[]): Shop {
-    return Object.assign(new Shop(), { id, wallet, shopGoods });
+  static create(id: number, wallet: Wallet, products: Product[]): Shop {
+    return Object.assign(new Shop(), { id, wallet, products });
   }
 
-  addShopGoods(shopGoods: ShopGoods): void {
-    this.shopGoods.push(shopGoods);
+  addShopGoods(products: Product): void {
+    this.products.push(products);
   }
 
-  removeShopGoods(shopGoods: ShopGoods): void {
-    this.shopGoods = this.shopGoods.filter((p) => p !== shopGoods);
+  removeShopGoods(products: Product): void {
+    this.products = this.products.filter((p) => p !== products);
   }
 
-  sellProduct(product: ShopGoods, quantity: number): PersonProducts {
-    const shopGoods = this.findProductBySku(product);
-    const purchasedProduct = shopGoods.sell(quantity);
+  sellProduct(product: Product, quantity: number): Product {
+    const products = this.findProductBySku(product);
+    const purchasedProduct = products.sell(quantity);
     purchasedProduct.depositProfit(this.wallet);
 
     return purchasedProduct;
   }
 
-  findProductBySku(product: ShopGoods): ShopGoods {
-    const shopGoods = this.shopGoods.find((p) => p.equalSku(product));
+  findProductBySku(product: Product): Product {
+    const products = this.products.find((p) => p.equalSku(product));
 
-    if (!shopGoods) {
+    if (!products) {
       throw new Error('Shop has not this product');
     }
 
-    return shopGoods;
+    return products;
   }
 }
 

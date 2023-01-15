@@ -1,13 +1,15 @@
 import { INestApplication } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { defineFeature, loadFeature } from 'jest-cucumber';
-import { PersonProducts } from '../../../../src/database/entities/person-products.entity';
+
+import { DataSource, Repository } from 'typeorm';
+
+import * as supertest from 'supertest';
+
 import { PersonController } from '../../../../src/person/person.controller';
 import { PersonModule } from '../../../../src/person/person.module';
-import supertest from 'supertest';
-import { Repository } from 'typeorm';
-import { ShopGoods } from '../../../../src/database/entities/shop-goods.entity';
 import Person from '../../../../src/database/entities/person.entity';
 import Wallet from '../../../../src/database/entities/wallet.entity';
 import Product from '../../../../src/database/entities/product.entity';
@@ -22,7 +24,7 @@ defineFeature(feature, (test) => {
   let agent;
   let personRepository: Repository<Person>;
   let walletRepository: Repository<Wallet>;
-  let shopGoodsRepository: Repository<ShopGoods>;
+  let productRepository: Repository<Product>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,7 +37,7 @@ defineFeature(feature, (test) => {
           username: 'admin',
           password: 'admin',
           database: 'nestjs',
-          entities: [Person, Wallet, PersonProducts, ShopGoods],
+          entities: [Person, Wallet, Product],
           synchronize: false,
         }),
       ],
@@ -49,7 +51,7 @@ defineFeature(feature, (test) => {
 
     personRepository = module.get('PersonRepository');
     walletRepository = module.get('WalletRepository');
-    shopGoodsRepository = module.get('ShopGoodsRepository');
+    productRepository = module.get('ProductRepository');
   });
 
   test('Customer by product he is afford to.', ({ given, when, then, and }) => {
@@ -60,16 +62,16 @@ defineFeature(feature, (test) => {
     afterAll(async () => {
       await personRepository.delete(person.id);
       await walletRepository.delete(person.wallet.id);
-      await shopGoodsRepository.delete(product.id);
     });
 
     given('There is a product called "red apple" that cost $1', async () => {
-      product = await shopGoodsRepository.save({
-        name: 'red apple',
-        price: 1,
-        quantity: 1,
-        sku: 'sku',
-      });
+      product = new Product();
+      product.name = 'red apple';
+      product.price = 1;
+      product.quantity = 1;
+      product.sku = 'sku';
+
+      product = await productRepository.save(product);
     });
 
     and('I am "John Doe"', async () => {
@@ -87,8 +89,10 @@ defineFeature(feature, (test) => {
       expect(person.wallet).toMatchObject({ balance: 10 });
     });
 
-    when('I buy this product', () => {
-      response = agent.post(`/person/${person.id}/product/${product.id}/buy`);
+    when('I buy this product', async () => {
+      response = await agent.post(
+        `/person/${person.id}/product/${product.id}/buy`,
+      );
     });
 
     then('I have this product on my products list', () => {
@@ -115,11 +119,11 @@ defineFeature(feature, (test) => {
     afterAll(async () => {
       await personRepository.delete(person.id);
       await walletRepository.delete(person.wallet.id);
-      await shopGoodsRepository.delete(product.id);
+      await productRepository.delete(product.id);
     });
 
     given('There is a product called "yellow pear" that cost $2', async () => {
-      product = await shopGoodsRepository.save({
+      product = await productRepository.save({
         name: 'yellow pear',
         price: 2,
         quantity: 1,
@@ -131,7 +135,7 @@ defineFeature(feature, (test) => {
       person = await personRepository.save({
         name: 'John Doe',
         wallet: {
-          balance: 10,
+          balance: 1,
         },
         cash: 0,
       });
@@ -141,8 +145,10 @@ defineFeature(feature, (test) => {
       expect(person.wallet).toMatchObject({ balance: 1 });
     });
 
-    when('I buy this product', () => {
-      response = agent.post(`/person/${person.id}/product/${product.id}/buy`);
+    when('I buy this product', async () => {
+      response = await agent.post(
+        `/person/${person.id}/product/${product.id}/buy`,
+      );
     });
 
     then('I see message "You have not enough money to buy it"', () => {

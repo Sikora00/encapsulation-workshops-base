@@ -1,15 +1,15 @@
-import { PersonProducts } from './person-products.entity';
 import Wallet from './wallet.entity';
 import {
   Column,
   Entity,
   JoinColumn,
-  OneToMany,
+  JoinTable,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ShopGoods } from './shop-goods.entity';
 import Shop from './shop.entity';
+import Product from './product.entity';
 
 @Entity()
 class Person {
@@ -26,14 +26,9 @@ class Person {
   @JoinColumn()
   wallet: Wallet;
 
-  @OneToMany(
-    (type) => PersonProducts,
-    (personProduct) => personProduct.person,
-    {
-      cascade: true,
-    },
-  )
-  products: PersonProducts[];
+  @ManyToMany(() => Product, { cascade: true, eager: true })
+  @JoinTable()
+  products: Product[];
 
   static create(name: string, cash: number, wallet: Wallet): Person {
     return Object.assign(new Person(), { name, cash, wallet });
@@ -46,26 +41,22 @@ class Person {
     return this;
   }
 
-  buyProductUsingWallet(product: ShopGoods): void {
+  buyProductUsingWallet(product: Product): void {
     try {
       const purchasedProduct = product.sell(1);
       purchasedProduct.executeTransaction(this.wallet);
 
-      this.products.push(
-        PersonProducts.create(product.name, product.quantity, product.price),
-      );
+      this.products.push(Product.createFromObject(product));
     } catch (e) {
       throw new Error('You have not enough money to buy it');
     }
   }
 
-  buyProductFromShop(product: ShopGoods, shop: Shop): void {
+  buyProductFromShop(product: Product, shop: Shop): void {
     const purchasedProduct = shop.sellProduct(product, 1);
     purchasedProduct.executeTransaction(this.wallet);
 
-    this.products.push(
-      PersonProducts.create(product.name, product.quantity, product.price),
-    );
+    this.products.push(Product.createFromObject(product));
   }
 }
 

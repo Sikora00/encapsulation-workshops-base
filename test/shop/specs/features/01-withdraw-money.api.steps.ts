@@ -2,13 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import { PersonController } from '../../../../src/person/person.controller';
 import { INestApplication } from '@nestjs/common';
-import Person from '../../../../src/database/entities/person.entity';
 import { Repository } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PersonProducts } from '../../../../src/database/entities/person-products.entity';
 import { PersonModule } from '../../../../src/person/person.module';
-import Wallet from '../../../../src/database/entities/wallet.entity';
+
 import * as supertest from 'supertest';
+
+import Wallet from '../../../../src/database/entities/wallet.entity';
+import Person from '../../../../src/database/entities/person.entity';
+import Product from '../../../../src/database/entities/product.entity';
 
 const feature = loadFeature(
   'test/shop/specs/features/01-withdraw-money.feature',
@@ -32,7 +34,7 @@ defineFeature(feature, (test) => {
           username: 'admin',
           password: 'admin',
           database: 'nestjs',
-          entities: [Person, Wallet, PersonProducts],
+          entities: [Person, Wallet, Product],
           synchronize: false,
         }),
       ],
