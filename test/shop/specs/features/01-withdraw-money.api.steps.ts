@@ -1,32 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { defineFeature, loadFeature } from 'jest-cucumber';
-import { PersonController } from '../../../../src/person/person.controller';
 import { INestApplication } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PersonModule } from '../../../../src/person/person.module';
+import { TransactionModule } from '../../../../src/transaction/transaction.module';
 
 import * as supertest from 'supertest';
-
-import Wallet from '../../../../src/database/entities/wallet.entity';
-import Person from '../../../../src/database/entities/person.entity';
-import Product from '../../../../src/database/entities/product.entity';
+import PersonEntity from '../../../../src/database/entities/person.entity';
+import WalletEntity from '../../../../src/database/entities/wallet.entity';
 
 const feature = loadFeature(
   'test/shop/specs/features/01-withdraw-money.feature',
 );
 
 defineFeature(feature, (test) => {
-  let controller: PersonController;
   let app: INestApplication;
   let agent;
-  let personRepository: Repository<Person>;
-  let walletRepository: Repository<Wallet>;
+  let personRepository: Repository<PersonEntity>;
+  let walletRepository: Repository<WalletEntity>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        PersonModule,
+        TransactionModule,
         TypeOrmModule.forRoot({
           type: 'postgres',
           host: 'localhost',
@@ -34,25 +30,24 @@ defineFeature(feature, (test) => {
           username: 'admin',
           password: 'admin',
           database: 'nestjs',
-          entities: [Person, Wallet, Product],
+          entities: [PersonEntity, WalletEntity],
           synchronize: false,
         }),
       ],
     }).compile();
 
-    controller = module.get<PersonController>(PersonController);
     app = await module.createNestApplication();
 
     agent = supertest.agent(app.getHttpServer());
     await app.init();
 
-    personRepository = module.get('PersonRepository');
-    walletRepository = module.get('WalletRepository');
+    personRepository = module.get('PersonEntityRepository');
+    walletRepository = module.get('WalletEntityRepository');
   });
 
   test('Withdraw money from the wallet', ({ given, when, then, and }) => {
     let response;
-    let person: Person;
+    let person: PersonEntity;
 
     afterAll(async () => {
       await personRepository.delete(person.id);
@@ -71,7 +66,7 @@ defineFeature(feature, (test) => {
 
     when('I withdraw the money $2 from the wallet', async () => {
       response = await agent
-        .post(`/person/${person.id}/withdraw-money`)
+        .post(`/transactions/persons/${person.id}/withdraw-money`)
         .send({ amount: 2 });
     });
 
@@ -89,8 +84,7 @@ defineFeature(feature, (test) => {
     when,
     then,
   }) => {
-    let error: Error;
-    let person: Person;
+    let person: PersonEntity;
     let response;
 
     afterAll(async () => {
@@ -110,7 +104,7 @@ defineFeature(feature, (test) => {
 
     when('I withdraw the money $6 from the wallet', async () => {
       response = await agent
-        .post(`/person/${person.id}/withdraw-money`)
+        .post(`/transactions/persons/${person.id}/withdraw-money`)
         .send({ amount: 6 });
     });
 
