@@ -8,6 +8,8 @@ import { TransactionModule } from '../../../../src/transaction/transaction.modul
 import * as supertest from 'supertest';
 import PersonEntity from '../../../../src/database/entities/person.entity';
 import WalletEntity from '../../../../src/database/entities/wallet.entity';
+import ProductEntity from '../../../../src/database/entities/product.entity';
+import PersonProductEntity from '../../../../src/database/entities/person-products.entity';
 
 const feature = loadFeature(
   'test/shop/specs/features/01-withdraw-money.feature',
@@ -30,7 +32,12 @@ defineFeature(feature, (test) => {
           username: 'admin',
           password: 'admin',
           database: 'nestjs',
-          entities: [PersonEntity, WalletEntity],
+          entities: [
+            PersonEntity,
+            WalletEntity,
+            ProductEntity,
+            PersonProductEntity,
+          ],
           synchronize: false,
         }),
       ],

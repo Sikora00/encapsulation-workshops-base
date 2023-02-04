@@ -12,29 +12,19 @@ export default class Person {
     this.wallet = wallet;
   }
 
-  withdrawMoneyFromWallet(amount: number): Person {
+  public withdrawMoneyFromWallet(amount: number): Person {
     this.wallet.withdraw(amount);
     this.cash += amount;
 
     return this;
   }
 
-  static createFromEntity(personEntity: PersonEntity): Person {
-    return new Person(
-      personEntity.name,
-      personEntity.cash,
-      Wallet.createFromEntity(personEntity.wallet),
-    );
-  }
+  public toEntity(): PersonEntity {
+    const personEntity = new PersonEntity();
+    personEntity.name = this.name;
+    personEntity.cash = this.cash;
+    personEntity.wallet = this.wallet.toEntity();
 
-  toEntity(): PersonEntity {
-    const person = new PersonEntity();
-    const wallet = this.wallet.toEntity();
-
-    person.name = this.name;
-    person.cash = this.cash;
-    person.wallet = wallet;
-
-    return person;
+    return personEntity;
   }
 }
