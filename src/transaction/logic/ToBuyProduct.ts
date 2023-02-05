@@ -7,11 +7,15 @@ export default class ToBuyProduct extends Product {
   }
 
   sell(quantity: number): PurchasedProduct {
-    if (this.isQuantityEnough(quantity)) {
-      this.removeFromStock(quantity);
-      const cost = this.calculateCost(quantity);
-      return new PurchasedProduct(this.name, quantity, cost);
-    } else {
+    this.throwErrorIfQuantityIsNotEnough(quantity);
+
+    this.removeFromStock(quantity);
+    const cost = this.calculateCost(quantity);
+    return new PurchasedProduct(this.name, quantity, cost);
+  }
+
+  private throwErrorIfQuantityIsNotEnough(quantity: number) {
+    if (!this.isQuantityEnough(quantity)) {
       throw new Error(`There is no ${this.name} available right now to buy`);
     }
   }
@@ -21,9 +25,7 @@ export default class ToBuyProduct extends Product {
   }
 
   private removeFromStock(quantity: number) {
-    if (this.isQuantityEnough(quantity)) {
-      throw new Error(`There is no ${this.name} available right now to buy`);
-    }
+    this.throwErrorIfQuantityIsNotEnough(quantity);
 
     this.stock -= quantity;
   }

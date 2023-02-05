@@ -62,9 +62,9 @@ export class TransactionService {
     const purchasedProduct = toBuyProduct.sell(amount);
     purchasedProduct.executeTransaction(wallet);
 
-    const updatedWallet = wallet.toEntity();
+    personEntity.wallet = wallet.toEntity();
 
-    await this.walletRepository.save(updatedWallet);
+    await this.personRepository.save(personEntity);
 
     const personProduct = new PersonProductEntity();
     personProduct.person = personEntity;

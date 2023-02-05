@@ -7,7 +7,11 @@ export default class PurchasedProduct extends Product {
   }
 
   executeTransaction(wallet: Wallet): void {
-    wallet.withdraw(this.price);
+    try {
+      wallet.withdraw(this.price);
+    } catch {
+      throw new Error('You have not enough money to buy it');
+    }
   }
 
   depositProfit(wallet: Wallet): void {

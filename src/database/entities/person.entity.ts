@@ -26,7 +26,7 @@ class PersonEntity {
   @OneToMany(() => PersonProductEntity, (personProduct) => personProduct.person)
   products: PersonProductEntity[];
 
-  @OneToOne(() => Wallet, { cascade: true, eager: true })
+  @OneToOne(() => Wallet, { cascade: true, eager: true, onDelete: 'CASCADE' })
   @JoinColumn()
   wallet: Wallet;
 

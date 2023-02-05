@@ -1,6 +1,5 @@
 import { INestApplication } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { defineFeature, loadFeature } from 'jest-cucumber';
 
@@ -13,6 +12,7 @@ import WalletEntity from '../../../../src/database/entities/wallet.entity';
 import { TransactionModule } from '../../../../src/transaction/transaction.module';
 import PersonProductEntity from '../../../../src/database/entities/person-products.entity';
 import ProductEntity from '../../../../src/database/entities/product.entity';
+import setupSqliteModule from './utils/db/sqlite';
 
 const feature = loadFeature(
   'test/shop/specs/features/02-buying-products.feature',
@@ -22,7 +22,6 @@ defineFeature(feature, (test) => {
   let app: INestApplication;
   let agent;
   let personRepository: Repository<PersonEntity>;
-  let walletRepository: Repository<WalletEntity>;
   let productRepository: Repository<ProductEntity>;
   let personProductRepository: Repository<PersonProductEntity>;
 
@@ -30,21 +29,12 @@ defineFeature(feature, (test) => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         TransactionModule,
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'admin',
-          password: 'admin',
-          database: 'nestjs',
-          entities: [
-            WalletEntity,
-            PersonEntity,
-            ProductEntity,
-            PersonProductEntity,
-          ],
-          synchronize: false,
-        }),
+        setupSqliteModule([
+          WalletEntity,
+          PersonEntity,
+          ProductEntity,
+          PersonProductEntity,
+        ]),
       ],
     }).compile();
 
@@ -66,7 +56,6 @@ defineFeature(feature, (test) => {
 
     afterAll(async () => {
       await personRepository.delete(person.id);
-      await walletRepository.delete(person.wallet.id);
       await productRepository.delete(product.id);
       await personProductRepository.clear();
     });
@@ -105,12 +94,17 @@ defineFeature(feature, (test) => {
 
     then('I have this product on my products list', () => {
       expect(response.body).toMatchObject({
-        products: [product],
+        person: {
+          id: person.id,
+        },
+        product: {
+          id: product.id,
+        },
       });
     });
 
     and('I have $9 left in the wallet', () => {
-      expect(response.body).toMatchObject({ balance: 9 });
+      expect(response.body.person.wallet).toMatchObject({ balance: 9 });
     });
   });
 
@@ -124,17 +118,10 @@ defineFeature(feature, (test) => {
     let person: PersonEntity;
     let product: ProductEntity;
 
-    afterAll(async () => {
-      await personRepository.delete(person.id);
-      await walletRepository.delete(person.wallet.id);
-      await productRepository.delete(product.id);
-      await personProductRepository.clear();
-    });
-
     given('There is a product called "yellow pear" that cost $2', async () => {
       product = await productRepository.save({
         name: 'yellow pear',
-        price: 2,
+        cost: 2,
         stock: 1,
       });
     });

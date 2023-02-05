@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import { INestApplication } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionModule } from '../../../../src/transaction/transaction.module';
 
 import * as supertest from 'supertest';
@@ -10,6 +9,7 @@ import PersonEntity from '../../../../src/database/entities/person.entity';
 import WalletEntity from '../../../../src/database/entities/wallet.entity';
 import ProductEntity from '../../../../src/database/entities/product.entity';
 import PersonProductEntity from '../../../../src/database/entities/person-products.entity';
+import setupSqliteModule from './utils/db/sqlite';
 
 const feature = loadFeature(
   'test/shop/specs/features/01-withdraw-money.feature',
@@ -25,21 +25,12 @@ defineFeature(feature, (test) => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         TransactionModule,
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'admin',
-          password: 'admin',
-          database: 'nestjs',
-          entities: [
-            PersonEntity,
-            WalletEntity,
-            ProductEntity,
-            PersonProductEntity,
-          ],
-          synchronize: false,
-        }),
+        setupSqliteModule([
+          PersonEntity,
+          WalletEntity,
+          ProductEntity,
+          PersonProductEntity,
+        ]),
       ],
     }).compile();
 
