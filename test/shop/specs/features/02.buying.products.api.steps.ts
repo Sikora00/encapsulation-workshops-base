@@ -44,7 +44,6 @@ defineFeature(feature, (test) => {
     await app.init();
 
     personRepository = module.get('PersonEntityRepository');
-    walletRepository = module.get('WalletEntityRepository');
     productRepository = module.get('ProductEntityRepository');
     personProductRepository = module.get('PersonProductEntityRepository');
   });
