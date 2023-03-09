@@ -1,10 +1,10 @@
-import WalletEntity from '../../database/entities/wallet.entity';
-
 export default class Wallet {
+  private id?: number;
   private balance: number;
 
-  constructor(balance = 0) {
+  constructor(balance = 0, id?: number) {
     this.balance = balance;
+    this.id = id;
   }
 
   withdraw(amount: number): Wallet {
@@ -22,15 +22,10 @@ export default class Wallet {
     return this;
   }
 
-  static createFromEntity(walletEntity: WalletEntity): Wallet {
-    return new Wallet(walletEntity.balance);
-  }
-
-  toEntity(): WalletEntity {
-    const wallet = new WalletEntity();
-
-    wallet.balance = this.balance;
-
-    return wallet;
+  toSnapshot() {
+    return {
+      balance: this.balance,
+      id: this.id,
+    };
   }
 }

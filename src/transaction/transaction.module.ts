@@ -6,9 +6,10 @@ import PersonEntity from '../database/entities/person.entity';
 import WalletEntity from '../database/entities/wallet.entity';
 import PersonProductEntity from '../database/entities/person-products.entity';
 import ProductEntity from '../database/entities/product.entity';
+import { SavePersonAndProduct } from '../database/transactions/save-person-and-product.service';
 
 @Module({
-  providers: [TransactionService],
+  providers: [TransactionService, SavePersonAndProduct],
   imports: [
     TypeOrmModule.forFeature([
       PersonEntity,

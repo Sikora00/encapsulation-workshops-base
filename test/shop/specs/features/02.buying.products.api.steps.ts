@@ -93,12 +93,8 @@ defineFeature(feature, (test) => {
 
     then('I have this product on my products list', () => {
       expect(response.body).toMatchObject({
-        person: {
-          id: person.id,
-        },
-        product: {
-          id: product.id,
-        },
+        personId: person.id,
+        productId: product.id,
       });
     });
 

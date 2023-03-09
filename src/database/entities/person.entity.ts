@@ -26,12 +26,29 @@ class PersonEntity {
   @OneToMany(() => PersonProductEntity, (personProduct) => personProduct.person)
   products: PersonProductEntity[];
 
-  @OneToOne(() => Wallet, { cascade: true, eager: true, onDelete: 'CASCADE' })
+  @OneToOne(() => Wallet, {
+    cascade: ['insert'],
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   wallet: Wallet;
 
   public toModel(): Person {
-    return new Person(this.name, this.cash, this.wallet.toModel());
+    return new Person(this.name, this.cash, this.wallet.toModel(), this.id);
+  }
+
+  public toEntity(person: Person): PersonEntity {
+    const personSnapshot = person.toSnapshot();
+
+    this.name = personSnapshot.name;
+    this.cash = personSnapshot.cash;
+    this.id = personSnapshot.id;
+
+    const walletEntity = new Wallet();
+    this.wallet = walletEntity.toEntity(personSnapshot.wallet);
+
+    return this;
   }
 }
 

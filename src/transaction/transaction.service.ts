@@ -7,6 +7,7 @@ import WalletEntity from '../database/entities/wallet.entity';
 import PersonProductEntity from '../database/entities/person-products.entity';
 import ProductEntity from '../database/entities/product.entity';
 import ToBuyProduct from './logic/ToBuyProduct';
+import { SavePersonAndProduct } from '../database/transactions/save-person-and-product.service';
 
 @Injectable()
 export class TransactionService {
@@ -19,6 +20,7 @@ export class TransactionService {
     private readonly productRepository: Repository<ProductEntity>,
     @InjectRepository(PersonProductEntity)
     private readonly personProductRepository: Repository<PersonProductEntity>,
+    private readonly savePersonAndProduct: SavePersonAndProduct,
   ) {}
 
   async withdrawMoney(id: number, amount: number) {
@@ -34,7 +36,9 @@ export class TransactionService {
 
     person.withdrawMoneyFromWallet(amount);
 
-    const updatedPersonEntity = person.toEntity();
+    const updatedPersonEntity = new PersonEntity();
+    updatedPersonEntity.toEntity(person);
+
     return await this.personRepository.save(updatedPersonEntity);
   }
 
@@ -61,16 +65,12 @@ export class TransactionService {
 
     const purchasedProduct = toBuyProduct.sell(amount);
     purchasedProduct.executeTransaction(wallet);
+    personEntity.wallet = WalletEntity.toEntity(wallet);
 
-    personEntity.wallet = wallet.toEntity();
-
-    await this.personRepository.save(personEntity);
-
-    const personProduct = new PersonProductEntity();
-    personProduct.person = personEntity;
-    personProduct.product = productEntity;
-    personProduct.quantity = amount;
-
-    return await this.personProductRepository.save(personProduct);
+    return await this.savePersonAndProduct.run({
+      person: personEntity.toModel(),
+      purchasedProduct: purchasedProduct,
+      product: productEntity,
+    });
   }
 }

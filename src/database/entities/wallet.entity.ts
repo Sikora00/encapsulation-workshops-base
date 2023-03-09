@@ -12,7 +12,27 @@ class WalletEntity {
   public balance: number;
 
   public toModel(): Wallet {
-    return new Wallet(this.balance);
+    return new Wallet(this.balance, this.id);
+  }
+
+  public toEntity(wallet: Wallet): WalletEntity {
+    const walletSnapshot = wallet.toSnapshot();
+
+    this.balance = walletSnapshot.balance;
+    this.id = walletSnapshot.id;
+
+    return this;
+  }
+
+  static toEntity(wallet: Wallet): WalletEntity {
+    const walletSnapshot = wallet.toSnapshot();
+
+    const walletEntity = new WalletEntity();
+
+    walletEntity.balance = walletSnapshot.balance;
+    walletEntity.id = walletSnapshot.id;
+
+    return walletEntity;
   }
 }
 

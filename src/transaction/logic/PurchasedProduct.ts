@@ -17,4 +17,12 @@ export default class PurchasedProduct extends Product {
   depositProfit(wallet: Wallet): void {
     wallet.deposit(this.price);
   }
+
+  public toSnapshot() {
+    return {
+      name: this.name,
+      stock: this.stock,
+      price: this.price,
+    };
+  }
 }

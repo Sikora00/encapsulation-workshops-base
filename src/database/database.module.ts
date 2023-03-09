@@ -5,6 +5,7 @@ import PersonEntity from './entities/person.entity';
 import WalletEntity from './entities/wallet.entity';
 import ProductEntity from './entities/product.entity';
 import PersonProductEntity from './entities/person-products.entity';
+import { SavePersonAndProduct } from './transactions/save-person-and-product.service';
 
 @Module({
   imports: [
@@ -28,5 +29,6 @@ import PersonProductEntity from './entities/person-products.entity';
       }),
     }),
   ],
+  providers: [SavePersonAndProduct],
 })
 export class DatabaseModule {}
