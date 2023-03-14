@@ -1,10 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import Wallet from '../../transaction/logic/Wallet';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import Wallet, { WalletSnapshot } from '../../transaction/models/Wallet';
+import { ToEntity, ToModel } from '../../common/interfaces/model.interface';
 
 @Entity({
   name: 'wallet',
 })
-class WalletEntity {
+class WalletEntity
+  extends BaseEntity
+  implements ToModel<Wallet>, ToEntity<WalletEntity>
+{
   @PrimaryGeneratedColumn()
   public id: number;
 
@@ -12,21 +16,10 @@ class WalletEntity {
   public balance: number;
 
   public toModel(): Wallet {
-    return new Wallet(this.balance, this.id);
+    return new Wallet(this.id, this.balance);
   }
 
-  public toEntity(wallet: Wallet): WalletEntity {
-    const walletSnapshot = wallet.toSnapshot();
-
-    this.balance = walletSnapshot.balance;
-    this.id = walletSnapshot.id;
-
-    return this;
-  }
-
-  static toEntity(wallet: Wallet): WalletEntity {
-    const walletSnapshot = wallet.toSnapshot();
-
+  toEntity(walletSnapshot: WalletSnapshot): WalletEntity {
     const walletEntity = new WalletEntity();
 
     walletEntity.balance = walletSnapshot.balance;

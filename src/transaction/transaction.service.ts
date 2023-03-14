@@ -1,76 +1,73 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-
-import PersonEntity from '../database/entities/person.entity';
-import WalletEntity from '../database/entities/wallet.entity';
-import PersonProductEntity from '../database/entities/person-products.entity';
-import ProductEntity from '../database/entities/product.entity';
-import ToBuyProduct from './logic/ToBuyProduct';
+import ToBuyProduct from './models/ToBuyProduct';
 import { SavePersonAndProduct } from '../database/transactions/save-person-and-product.service';
+import { PersonProduct } from './models/PersonProduct';
+import Person from './models/Person';
+import { PersonRepository } from '../database/repositories/person.repository';
+import { ProductRepository } from '../database/repositories/product.repository';
+import { Product } from './models/Product';
+import { WalletRepository } from '../database/repositories/wallet.repository';
+import Wallet from './models/Wallet';
+import { PersonProductsRepository } from '../database/repositories/person-products.repository';
 
 @Injectable()
 export class TransactionService {
   constructor(
-    @InjectRepository(PersonEntity)
-    private readonly personRepository: Repository<PersonEntity>,
-    @InjectRepository(WalletEntity)
-    private readonly walletRepository: Repository<WalletEntity>,
-    @InjectRepository(ProductEntity)
-    private readonly productRepository: Repository<ProductEntity>,
-    @InjectRepository(PersonProductEntity)
-    private readonly personProductRepository: Repository<PersonProductEntity>,
+    private readonly personRepository: PersonRepository<Person>,
+    private readonly walletRepository: WalletRepository<Wallet>,
+    private readonly productRepository: ProductRepository<Product>,
+    private readonly personProductRepository: PersonProductsRepository<PersonProduct>,
     private readonly savePersonAndProduct: SavePersonAndProduct,
   ) {}
 
   async withdrawMoney(id: number, amount: number) {
-    const personEntity = await this.personRepository.findOne({
+    const person = await this.personRepository.findOneModelOrFail({
       where: { id },
     });
 
-    if (!personEntity) {
-      throw new Error('Person not found.');
-    }
-
-    const person = personEntity.toModel();
-
     person.withdrawMoneyFromWallet(amount);
+    await this.personRepository.saveModel(person);
 
-    const updatedPersonEntity = new PersonEntity();
-    updatedPersonEntity.toEntity(person);
-
-    return await this.personRepository.save(updatedPersonEntity);
+    return {
+      cash: person.howMuchCash(),
+      wallet: person.toSnapshot().wallet,
+    };
   }
 
-  async buyProduct(personId: number, productId: number, amount: number) {
-    const personEntity = await this.personRepository.findOne({
-      where: { id: personId },
-    });
-
-    if (!personEntity) throw new Error('Person not found.');
-
-    const productEntity = await this.productRepository.findOne({
+  async buyProduct(walletId: number, productId: number, amount: number) {
+    const product = await this.productRepository.findOneModelOrFail({
       where: { id: productId },
     });
 
-    if (!productEntity) throw new Error('Product not found.');
+    const wallet = await this.walletRepository.findOneModelOrFail({
+      where: { id: walletId },
+    });
 
-    const wallet = personEntity.wallet.toModel();
-
+    const productSnapshot = product.toSnapshot();
     const toBuyProduct = new ToBuyProduct(
-      productEntity.name,
-      productEntity.stock,
-      productEntity.cost,
+      productSnapshot.id,
+      productSnapshot.name,
+      productSnapshot.stock,
+      productSnapshot.price,
     );
 
     const purchasedProduct = toBuyProduct.sell(amount);
     purchasedProduct.executeTransaction(wallet);
-    personEntity.wallet = WalletEntity.toEntity(wallet);
+
+    const person = await this.personRepository.findOneModelOrFail({
+      where: { wallet: { id: walletId } },
+    });
+
+    const personProduct = new PersonProduct(
+      undefined,
+      purchasedProduct,
+      person,
+      amount,
+    );
 
     return await this.savePersonAndProduct.run({
-      person: personEntity.toModel(),
-      purchasedProduct: purchasedProduct,
-      product: productEntity,
+      wallet: wallet.toSnapshot(),
+      personProduct: personProduct.toSnapshot(),
     });
   }
 }

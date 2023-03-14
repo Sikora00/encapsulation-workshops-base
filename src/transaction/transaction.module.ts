@@ -7,9 +7,20 @@ import WalletEntity from '../database/entities/wallet.entity';
 import PersonProductEntity from '../database/entities/person-products.entity';
 import ProductEntity from '../database/entities/product.entity';
 import { SavePersonAndProduct } from '../database/transactions/save-person-and-product.service';
+import { PersonRepository } from '../database/repositories/person.repository';
+import { ProductRepository } from '../database/repositories/product.repository';
+import { WalletRepository } from '../database/repositories/wallet.repository';
+import { PersonProductsRepository } from '../database/repositories/person-products.repository';
 
 @Module({
-  providers: [TransactionService, SavePersonAndProduct],
+  providers: [
+    TransactionService,
+    SavePersonAndProduct,
+    PersonRepository,
+    PersonProductsRepository,
+    ProductRepository,
+    WalletRepository,
+  ],
   imports: [
     TypeOrmModule.forFeature([
       PersonEntity,

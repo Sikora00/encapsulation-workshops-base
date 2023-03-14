@@ -1,9 +1,10 @@
 import { Product } from './Product';
 import PurchasedProduct from './PurchasedProduct';
+import { DatabaseId } from '../../common/types/id.type';
 
 export default class ToBuyProduct extends Product {
-  constructor(name: string, quantity: number, price: number) {
-    super(name, quantity, price);
+  constructor(id: DatabaseId, name: string, quantity: number, price: number) {
+    super(id, name, quantity, price);
   }
 
   sell(quantity: number): PurchasedProduct {
@@ -11,7 +12,7 @@ export default class ToBuyProduct extends Product {
 
     this.removeFromStock(quantity);
     const cost = this.calculateCost(quantity);
-    return new PurchasedProduct(this.name, quantity, cost);
+    return new PurchasedProduct(this.id, this.name, quantity, cost);
   }
 
   private throwErrorIfQuantityIsNotEnough(quantity: number) {

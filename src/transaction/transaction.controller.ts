@@ -20,15 +20,15 @@ export class TransactionController {
     }
   }
 
-  @Post('/persons/:personId/products/:productId/buy')
+  @Post('/wallets/:walletId/products/:productId/buy')
   async buyProduct(
-    @Param('personId') personId: string,
+    @Param('walletId') walletId: string,
     @Param('productId') productId: string,
     @Body('amount') amount: number,
   ) {
     try {
       return await this.transactionService.buyProduct(
-        parseInt(personId),
+        parseInt(walletId),
         parseInt(productId),
         amount,
       );

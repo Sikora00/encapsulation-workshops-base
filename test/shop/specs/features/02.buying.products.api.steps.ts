@@ -85,7 +85,9 @@ defineFeature(feature, (test) => {
 
     when('I buy this product', async () => {
       response = await agent
-        .post(`/transactions/persons/${person.id}/products/${product.id}/buy`)
+        .post(
+          `/transactions/wallets/${person.wallet.id}/products/${product.id}/buy`,
+        )
         .send({
           amount: 1,
         });
@@ -137,7 +139,9 @@ defineFeature(feature, (test) => {
 
     when('I buy this product', async () => {
       response = await agent
-        .post(`/transactions/persons/${person.id}/products/${product.id}/buy`)
+        .post(
+          `/transactions/wallets/${person.wallet.id}/products/${product.id}/buy`,
+        )
         .send({
           amount: 1,
         });

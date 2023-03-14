@@ -1,8 +1,16 @@
-export default class Wallet {
-  private id?: number;
+import { Snapshotting } from '../../common/interfaces/snapshotable.interface';
+import { DatabaseId } from '../../common/types/id.type';
+
+export interface WalletSnapshot {
+  id?: number;
+  balance: number;
+}
+
+export default class Wallet implements Snapshotting<WalletSnapshot> {
+  private readonly id?: DatabaseId;
   private balance: number;
 
-  constructor(balance = 0, id?: number) {
+  constructor(id: DatabaseId, balance = 0) {
     this.balance = balance;
     this.id = id;
   }
@@ -22,7 +30,7 @@ export default class Wallet {
     return this;
   }
 
-  toSnapshot() {
+  toSnapshot(): WalletSnapshot {
     return {
       balance: this.balance,
       id: this.id,

@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   Entity,
   JoinColumn,
@@ -7,12 +8,17 @@ import {
 } from 'typeorm';
 import ProductEntity from './product.entity';
 import PersonEntity from './person.entity';
-import PurchasedProduct from '../../transaction/logic/PurchasedProduct';
+import PurchasedProduct from '../../transaction/models/PurchasedProduct';
+import { ToEntity, ToModel } from '../../common/interfaces/model.interface';
+import { PersonProduct } from '../../transaction/models/PersonProduct';
 
 @Entity({
   name: 'person-product',
 })
-class PersonProductEntity {
+class PersonProductEntity
+  extends BaseEntity
+  implements ToEntity<PersonProductEntity>, ToModel<PersonProduct>
+{
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -38,6 +44,15 @@ class PersonProductEntity {
     this.quantity = personProductSnapshot.stock;
 
     return this;
+  }
+
+  toModel(): PersonProduct {
+    return new PersonProduct(
+      this.id,
+      this.product.toModel(),
+      this.person.toModel(),
+      this.quantity,
+    );
   }
 }
 
