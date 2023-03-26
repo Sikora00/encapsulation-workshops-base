@@ -1,8 +1,14 @@
-import { Product } from './Product';
+import { Product, ProductSnapshot } from './Product';
 import PurchasedProduct from './PurchasedProduct';
 import { DatabaseId } from '../../common/types/id.type';
+import { Snapshotting } from '../../common/interfaces/snapshotable.interface';
 
-export default class ToBuyProduct extends Product {
+export type ToBuyProductSnapshot = ProductSnapshot;
+
+export default class ToBuyProduct
+  extends Product
+  implements Snapshotting<ToBuyProductSnapshot>
+{
   constructor(id: DatabaseId, name: string, quantity: number, price: number) {
     super(id, name, quantity, price);
   }
@@ -29,5 +35,11 @@ export default class ToBuyProduct extends Product {
     this.throwErrorIfQuantityIsNotEnough(quantity);
 
     this.stock -= quantity;
+  }
+
+  public toSnapshot() {
+    return {
+      ...super.toSnapshot(),
+    };
   }
 }

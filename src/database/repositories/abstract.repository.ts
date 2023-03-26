@@ -18,9 +18,7 @@ export class AbstractRepository<
   }
 
   public async saveModel(model: Model): Promise<Model> {
-    const entity = this.create();
-
-    entity.toEntity(model);
+    const entity = this.create().toEntity(model);
 
     const savedEntity = await super.save(entity);
 

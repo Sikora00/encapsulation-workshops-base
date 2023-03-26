@@ -36,6 +36,7 @@ class PersonProductEntity
   @Column()
   personId?: number;
 
+  @Column()
   quantity: number;
 
   public toEntity(personProduct: PurchasedProduct): PersonProductEntity {

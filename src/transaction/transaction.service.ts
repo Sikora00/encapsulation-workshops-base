@@ -9,6 +9,10 @@ import { Product } from './models/Product';
 import { WalletRepository } from '../database/repositories/wallet.repository';
 import Wallet from './models/Wallet';
 import { PersonProductsRepository } from '../database/repositories/person-products.repository';
+import ShopProduct from './models/ShopProduct';
+import { ShopProductRepository } from '../database/repositories/shop-products.repository';
+import Shop from './models/Shop';
+import { ShopRepository } from '../database/repositories/shop.repository';
 
 @Injectable()
 export class TransactionService {
@@ -18,6 +22,8 @@ export class TransactionService {
     private readonly productRepository: ProductRepository<Product>,
     private readonly personProductRepository: PersonProductsRepository<PersonProduct>,
     private readonly savePersonAndProduct: SavePersonAndProduct,
+    private readonly shopProductRepository: ShopProductRepository<ShopProduct>,
+    private readonly shopRepository: ShopRepository<Shop>,
   ) {}
 
   async withdrawMoney(id: number, amount: number) {
@@ -69,5 +75,34 @@ export class TransactionService {
       wallet: wallet.toSnapshot(),
       personProduct: personProduct.toSnapshot(),
     });
+  }
+
+  async buyShopProduct(walletId: number, shopId: number, productId: number) {
+    const wallet = await this.walletRepository.findOneModelOrFail({
+      where: { id: walletId },
+    });
+
+    const shop = await this.shopRepository.findOneModelOrFail({
+      relations: ['products', 'products.product', 'wallet'],
+      where: {
+        id: shopId,
+      },
+    });
+
+    const shopProduct = await this.shopProductRepository.findOneModelOrFail({
+      relations: ['product'],
+      where: { product: { id: productId } },
+    });
+
+    const purchasedProduct = shop.sellProduct(shopProduct, 1);
+    purchasedProduct.executeTransaction(wallet);
+
+    await this.walletRepository.saveModel(wallet);
+    await this.shopProductRepository.saveModel(shopProduct);
+    await this.shopRepository.saveModel(shop);
+
+    return {
+      status: 'success',
+    };
   }
 }

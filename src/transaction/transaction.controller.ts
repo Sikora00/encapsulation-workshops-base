@@ -36,4 +36,24 @@ export class TransactionController {
       throw new HttpException(error.message, 400);
     }
   }
+
+  @Post('/wallets/:walletId/shops/:shopId/buy')
+  async buyProducts(
+    @Param('walletId') walletId: string,
+    @Param('shopId') shopId: string,
+    @Body('productId') productId: number,
+  ) {
+    try {
+      return await this.transactionService.buyShopProduct(
+        parseInt(walletId),
+        parseInt(shopId),
+        productId,
+      );
+    } catch (error) {
+      return {
+        status: 'failed',
+        message: error.message,
+      };
+    }
+  }
 }

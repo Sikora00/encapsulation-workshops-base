@@ -11,6 +11,10 @@ import { PersonRepository } from '../database/repositories/person.repository';
 import { ProductRepository } from '../database/repositories/product.repository';
 import { WalletRepository } from '../database/repositories/wallet.repository';
 import { PersonProductsRepository } from '../database/repositories/person-products.repository';
+import ShopEntity from '../database/entities/shop.entity';
+import ShopProductEntity from '../database/entities/shop-product.entity';
+import { ShopProductRepository } from '../database/repositories/shop-products.repository';
+import { ShopRepository } from '../database/repositories/shop.repository';
 
 @Module({
   providers: [
@@ -20,6 +24,8 @@ import { PersonProductsRepository } from '../database/repositories/person-produc
     PersonProductsRepository,
     ProductRepository,
     WalletRepository,
+    ShopProductRepository,
+    ShopRepository,
   ],
   imports: [
     TypeOrmModule.forFeature([
@@ -27,6 +33,8 @@ import { PersonProductsRepository } from '../database/repositories/person-produc
       WalletEntity,
       PersonProductEntity,
       ProductEntity,
+      ShopEntity,
+      ShopProductEntity,
     ]),
   ],
   controllers: [TransactionController],
