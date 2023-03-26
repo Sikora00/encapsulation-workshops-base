@@ -46,10 +46,8 @@ defineFeature(feature, (test) => {
     agent = supertest.agent(app.getHttpServer());
     await app.init();
 
-    walletRepository = module.get('WalletEntityRepository');
     personRepository = module.get('PersonEntityRepository');
     productRepository = module.get('ProductEntityRepository');
-    personProductRepository = module.get('PersonProductEntityRepository');
     shopProductRepository = module.get('ShopProductEntityRepository');
     shopRepository = module.get('ShopEntityRepository');
   });
