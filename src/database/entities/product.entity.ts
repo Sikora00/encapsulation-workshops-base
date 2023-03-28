@@ -18,20 +18,16 @@ class ProductEntity
   @Column()
   cost: number;
 
-  @Column()
-  stock: number;
-
   toEntity(snapshot: ProductSnapshot): ProductEntity {
     this.id = snapshot.id;
     this.name = snapshot.name;
     this.cost = snapshot.price;
-    this.stock = snapshot.stock;
 
     return this;
   }
 
   toModel(): Product {
-    return new Product(this.id, this.name, this.stock, this.cost);
+    return new Product(this.id, this.name, this.cost);
   }
 }
 

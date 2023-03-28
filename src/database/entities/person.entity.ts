@@ -30,7 +30,7 @@ class PersonEntity
   products: PersonProductEntity[];
 
   @OneToOne(() => Wallet, {
-    cascade: ['insert'],
+    cascade: ['insert', 'update'],
     eager: true,
     onDelete: 'CASCADE',
   })

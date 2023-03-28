@@ -63,7 +63,6 @@ defineFeature(feature, (test) => {
       product = new ProductEntity();
       product.name = 'red apple';
       product.cost = 1;
-      product.stock = 1;
 
       product = await productRepository.save(product);
     });

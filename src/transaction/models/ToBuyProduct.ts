@@ -9,32 +9,13 @@ export default class ToBuyProduct
   extends Product
   implements Snapshotting<ToBuyProductSnapshot>
 {
-  constructor(id: DatabaseId, name: string, quantity: number, price: number) {
-    super(id, name, quantity, price);
+  constructor(id: DatabaseId, name: string, price: number) {
+    super(id, name, price);
   }
 
   sell(quantity: number): PurchasedProduct {
-    this.throwErrorIfQuantityIsNotEnough(quantity);
-
-    this.removeFromStock(quantity);
     const cost = this.calculateCost(quantity);
-    return new PurchasedProduct(this.id, this.name, quantity, cost);
-  }
-
-  private throwErrorIfQuantityIsNotEnough(quantity: number) {
-    if (!this.isQuantityEnough(quantity)) {
-      throw new Error(`There is no ${this.name} available right now to buy`);
-    }
-  }
-
-  private isQuantityEnough(quantity: number) {
-    return this.stock >= quantity;
-  }
-
-  private removeFromStock(quantity: number) {
-    this.throwErrorIfQuantityIsNotEnough(quantity);
-
-    this.stock -= quantity;
+    return new PurchasedProduct(this.id, this.name, cost);
   }
 
   public toSnapshot() {

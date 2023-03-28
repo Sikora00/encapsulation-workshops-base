@@ -6,15 +6,14 @@ import { DatabaseId } from '../../common/types/id.type';
 export interface PurchasedProductSnapshot {
   id?: DatabaseId;
   name: string;
-  stock: number;
   price: number;
 }
 export default class PurchasedProduct
   extends Product
   implements Snapshotting<PurchasedProductSnapshot>
 {
-  constructor(id: DatabaseId, name: string, quantity: number, cost: number) {
-    super(id, name, quantity, cost);
+  constructor(id: DatabaseId, name: string, cost: number) {
+    super(id, name, cost);
   }
 
   executeTransaction(wallet: Wallet): void {
@@ -33,7 +32,6 @@ export default class PurchasedProduct
     return {
       id: this.id,
       name: this.name,
-      stock: this.stock,
       price: this.price,
     };
   }

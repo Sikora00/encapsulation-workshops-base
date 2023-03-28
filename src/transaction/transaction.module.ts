@@ -15,11 +15,13 @@ import ShopEntity from '../database/entities/shop.entity';
 import ShopProductEntity from '../database/entities/shop-product.entity';
 import { ShopProductRepository } from '../database/repositories/shop-products.repository';
 import { ShopRepository } from '../database/repositories/shop.repository';
+import { SaveAfterShopTransactionData } from '../database/transactions/save-after-shop-transaction-data';
 
 @Module({
   providers: [
     TransactionService,
     SavePersonAndProduct,
+    SaveAfterShopTransactionData,
     PersonRepository,
     PersonProductsRepository,
     ProductRepository,

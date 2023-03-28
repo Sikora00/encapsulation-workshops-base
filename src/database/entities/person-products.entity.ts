@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import ProductEntity from './product.entity';
 import PersonEntity from './person.entity';
-import PurchasedProduct from '../../transaction/models/PurchasedProduct';
 import { ToEntity, ToModel } from '../../common/interfaces/model.interface';
 import { PersonProduct } from '../../transaction/models/PersonProduct';
 
@@ -39,10 +38,13 @@ class PersonProductEntity
   @Column()
   quantity: number;
 
-  public toEntity(personProduct: PurchasedProduct): PersonProductEntity {
-    const personProductSnapshot = personProduct.toSnapshot();
+  public toEntity(personProduct: PersonProduct): PersonProductEntity {
+    const snapshot = personProduct.toSnapshot();
 
-    this.quantity = personProductSnapshot.stock;
+    this.id = snapshot.id;
+    this.quantity = snapshot.quantity;
+    this.productId = snapshot.product.id;
+    this.personId = snapshot.person.id;
 
     return this;
   }

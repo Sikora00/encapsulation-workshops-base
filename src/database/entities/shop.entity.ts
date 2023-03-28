@@ -23,12 +23,14 @@ class ShopEntity
   public id: number;
 
   @OneToOne(() => WalletEntity, {
-    cascade: true,
+    cascade: ['insert', 'update'],
   })
   @JoinColumn()
   wallet: WalletEntity;
 
-  @OneToMany(() => ShopProductEntity, (shopProduct) => shopProduct.shop)
+  @OneToMany(() => ShopProductEntity, (shopProduct) => shopProduct.shop, {
+    cascade: ['insert', 'update'],
+  })
   products: ShopProductEntity[];
 
   public toModel(): Shop {

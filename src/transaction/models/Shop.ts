@@ -21,30 +21,28 @@ export default class Shop implements Snapshotting<ShopSnapshot> {
     this.wallet = wallet;
   }
 
-  addShopGoods(products: ShopProduct): void {
-    this.products.push(products);
-  }
-
-  removeShopGoods(products: ShopProduct): void {
-    this.products = this.products.filter((p) => p !== products);
-  }
-
-  sellProduct(product: ShopProduct, quantity: number): PurchasedProduct {
-    const products = this.findProductBySku(product);
+  sellProduct(productId: number, quantity: number): PurchasedProduct {
+    const products = this.findProductByProductId(productId);
     const purchasedProduct = products.sell(quantity);
     purchasedProduct.depositProfit(this.wallet);
 
     return purchasedProduct;
   }
 
-  findProductBySku(product: ShopProduct): ShopProduct {
-    const products = this.products.find((p) => p.isSkuEqual(product));
+  findProductByProductId(productId: number): ShopProduct {
+    const product = this.products.find((p) => p.isIdEqual(productId));
 
-    if (!products) {
+    if (!product) {
       throw new Error('Shop has not this product');
     }
 
-    return products;
+    return product;
+  }
+
+  throwIfProductIsNotAvailable(productId: number) {
+    const product = this.findProductByProductId(productId);
+
+    product.throwErrorIfNotInStock();
   }
 
   toSnapshot(): ShopSnapshot {

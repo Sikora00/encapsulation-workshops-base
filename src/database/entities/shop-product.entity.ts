@@ -39,14 +39,14 @@ class ShopProductEntity
   shopId?: number;
 
   @Column()
-  quantity?: number;
+  stock?: number;
 
   public toEntity(shopProduct: ShopProduct): ShopProductEntity {
     const shopProductSnapshot = shopProduct.toSnapshot();
 
     this.productId = shopProductSnapshot.id;
     this.shopId = shopProductSnapshot.shopId;
-    this.quantity = shopProductSnapshot.quantity;
+    this.stock = shopProductSnapshot.stock;
     this.id = shopProductSnapshot.id;
 
     return this;
@@ -56,7 +56,7 @@ class ShopProductEntity
     return new ShopProduct(
       this.id,
       this.product?.name,
-      this.quantity,
+      this.stock,
       this.product?.cost,
       this.sku,
       this.shopId,

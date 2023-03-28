@@ -1,4 +1,4 @@
-import { defineFeature, DefineStepFunction, loadFeature } from 'jest-cucumber';
+import { defineFeature, loadFeature } from 'jest-cucumber';
 import { INestApplication } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import PersonEntity from '../../../../src/database/entities/person.entity';
@@ -23,8 +23,7 @@ defineFeature(feature, (test) => {
   let productRepository: Repository<ProductEntity>;
   let shopProductRepository: Repository<ShopProductEntity>;
   let shopRepository: Repository<ShopEntity>;
-  let product: ProductEntity;
-  let shop: ShopEntity;
+  let walletRepository: Repository<WalletEntity>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -50,20 +49,32 @@ defineFeature(feature, (test) => {
     productRepository = module.get('ProductEntityRepository');
     shopProductRepository = module.get('ShopProductEntityRepository');
     shopRepository = module.get('ShopEntityRepository');
+    walletRepository = module.get('WalletEntityRepository');
   });
 
-  const givenThereIsRedApply = (given: DefineStepFunction) => {
+  afterEach(async () => {
+    await personRepository.delete({});
+    await shopProductRepository.delete({});
+    await shopRepository.delete({});
+    await walletRepository.delete({});
+    await productRepository.delete({});
+  });
+
+  test('Sell products to customers', ({ given, when, then, and }) => {
+    let response;
+    let person: PersonEntity;
+    let wallet: WalletEntity;
+    let shop: ShopEntity;
+    let product: ProductEntity;
+
     given('There is "red apple" with sku "1" and the price $1', async () => {
       product = new ProductEntity();
       product.name = 'red apple';
       product.cost = 1;
-      product.stock = 1;
 
       product = await productRepository.save(product);
     });
-  };
 
-  const andThereIsAShop = (and: DefineStepFunction) => {
     and('There is a shop with $0 on the bank account', async () => {
       shop = new ShopEntity();
       shop.wallet = new WalletEntity();
@@ -71,40 +82,29 @@ defineFeature(feature, (test) => {
 
       shop = await shopRepository.save(shop);
     });
-  };
 
-  test('Sell products to customers', ({ given, when, then, and }) => {
-    let response;
-    let person: PersonEntity;
-
-    // afterAll(async () => {
-    //   await personRepository.delete(person.id);
-    //   await productRepository.delete(product.id);
-    //   await personProductRepository.clear();
-    //   await shopProductRepository.clear();
-    // });
-    givenThereIsRedApply(given);
-    andThereIsAShop(and);
-    given('There is a shop with 1 red apple in the stock', () => {
+    and('There is a shop with 1 red apple in the stock', async () => {
       const shopProduct = new ShopProductEntity();
       shopProduct.product = product;
       shopProduct.shop = shop;
       shopProduct.sku = '1';
+      shopProduct.stock = 1;
 
-      shopProductRepository.save(shopProduct);
+      await shopProductRepository.save(shopProduct);
     });
 
     and('I am a customer', async () => {
       person = new PersonEntity();
       person.name = 'John Doe';
-      person.wallet = new WalletEntity();
-      person.wallet.balance = 10;
+      const walletEntity = new WalletEntity();
+      walletEntity.balance = 10;
       person = await personRepository.save(person);
+      wallet = await walletRepository.save(walletEntity);
     });
 
     when('I buy red apple from the shop', async () => {
       response = await agent
-        .post(`/transactions/wallets/${person.wallet.id}/shops/${shop.id}/buy`)
+        .post(`/transactions/wallets/${wallet.id}/shops/${shop.id}/buy`)
         .send({ productId: product.id })
         .then((res) => (response = res));
 
@@ -117,11 +117,12 @@ defineFeature(feature, (test) => {
         where: { id: shop.id },
         relations: ['wallet', 'products'],
       });
+
       expect(shop.wallet.balance).toBe(1);
     });
 
     and('Shop have 0 red apples in the stock', () => {
-      expect(shop.products[0].quantity).toBe(0);
+      expect(shop.products[0].stock).toBe(0);
     });
   });
 
@@ -133,14 +134,32 @@ defineFeature(feature, (test) => {
   }) => {
     let response;
     let person: PersonEntity;
+    let wallet: WalletEntity;
+    let shop: ShopEntity;
+    let product: ProductEntity;
 
-    givenThereIsRedApply(given);
-    andThereIsAShop(and);
+    given('There is "red apple" with sku "1" and the price $1', async () => {
+      product = new ProductEntity();
+      product.name = 'red apple';
+      product.cost = 1;
+
+      product = await productRepository.save(product);
+    });
+
+    and('There is a shop with $0 on the bank account', async () => {
+      shop = new ShopEntity();
+      shop.wallet = new WalletEntity();
+      shop.wallet.balance = 0;
+
+      shop = await shopRepository.save(shop);
+    });
+
     given('There is a shop with 0 red apples in the stock', () => {
       const shopProduct = new ShopProductEntity();
       shopProduct.product = product;
       shopProduct.shop = shop;
       shopProduct.sku = '1';
+      shopProduct.stock = 0;
 
       shopProductRepository.save(shopProduct);
     });
@@ -148,14 +167,15 @@ defineFeature(feature, (test) => {
     and('I am a customer', async () => {
       person = new PersonEntity();
       person.name = 'John Doe';
-      person.wallet = new WalletEntity();
-      person.wallet.balance = 10;
+      const walletEntity = new WalletEntity();
+      walletEntity.balance = 10;
       person = await personRepository.save(person);
+      wallet = await walletRepository.save(walletEntity);
     });
 
     when('I buy red apple from the shop', async () => {
       response = await agent
-        .post(`/transactions/wallets/${person.wallet.id}/shops/${shop.id}/buy`)
+        .post(`/transactions/wallets/${wallet.id}/shops/${shop.id}/buy`)
         .send({ productId: product.id })
         .then((res) => (response = res));
 
@@ -166,7 +186,7 @@ defineFeature(feature, (test) => {
     then(
       'I see error "There is no red apple available right now to buy"',
       () => {
-        expect(response.message).toBe(
+        expect(response.body.message).toBe(
           'There is no red apple available right now to buy',
         );
       },

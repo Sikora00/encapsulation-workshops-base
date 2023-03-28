@@ -4,20 +4,17 @@ import { Snapshotting } from '../../common/interfaces/snapshotable.interface';
 export interface ProductSnapshot {
   id?: DatabaseId;
   name: string;
-  stock: number;
   price: number;
 }
 
 export class Product implements Snapshotting<ProductSnapshot> {
   protected readonly id: DatabaseId;
   protected price: number;
-  protected stock: number;
   protected name: string;
 
-  constructor(id: DatabaseId, name: string, stock: number, price: number) {
+  constructor(id: DatabaseId, name: string, price: number) {
     this.id = id;
     this.name = name;
-    this.stock = stock;
     this.price = price;
   }
 
@@ -29,7 +26,6 @@ export class Product implements Snapshotting<ProductSnapshot> {
     return {
       id: this.id,
       name: this.name,
-      stock: this.stock,
       price: this.price,
     };
   }

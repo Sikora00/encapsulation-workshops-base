@@ -13,6 +13,7 @@ import ShopProduct from './models/ShopProduct';
 import { ShopProductRepository } from '../database/repositories/shop-products.repository';
 import Shop from './models/Shop';
 import { ShopRepository } from '../database/repositories/shop.repository';
+import { SaveAfterShopTransactionData } from '../database/transactions/save-after-shop-transaction-data';
 
 @Injectable()
 export class TransactionService {
@@ -21,9 +22,11 @@ export class TransactionService {
     private readonly walletRepository: WalletRepository<Wallet>,
     private readonly productRepository: ProductRepository<Product>,
     private readonly personProductRepository: PersonProductsRepository<PersonProduct>,
-    private readonly savePersonAndProduct: SavePersonAndProduct,
+
     private readonly shopProductRepository: ShopProductRepository<ShopProduct>,
     private readonly shopRepository: ShopRepository<Shop>,
+    private readonly savePersonAndProduct: SavePersonAndProduct,
+    private readonly saveAfterShopTransactionData: SaveAfterShopTransactionData,
   ) {}
 
   async withdrawMoney(id: number, amount: number) {
@@ -53,7 +56,6 @@ export class TransactionService {
     const toBuyProduct = new ToBuyProduct(
       productSnapshot.id,
       productSnapshot.name,
-      productSnapshot.stock,
       productSnapshot.price,
     );
 
@@ -89,20 +91,18 @@ export class TransactionService {
       },
     });
 
-    const shopProduct = await this.shopProductRepository.findOneModelOrFail({
-      relations: ['product'],
-      where: { product: { id: productId } },
-    });
+    shop.throwIfProductIsNotAvailable(productId);
 
-    const purchasedProduct = shop.sellProduct(shopProduct, 1);
+    const purchasedProduct = shop.sellProduct(productId, 1);
     purchasedProduct.executeTransaction(wallet);
 
-    await this.walletRepository.saveModel(wallet);
-    await this.shopProductRepository.saveModel(shopProduct);
-    await this.shopRepository.saveModel(shop);
+    const success = await this.saveAfterShopTransactionData.run({
+      buyerWalletSnapshot: wallet.toSnapshot(),
+      shopSnapshot: shop.toSnapshot(),
+    });
 
     return {
-      status: 'success',
+      status: success ? 'success' : 'fail',
     };
   }
 }
